@@ -62,6 +62,7 @@ BLDC BLDC_DRIVER;
 float q_kp= 0.1;
 float d_kp= 0.1;
 float q_ref=500;
+uint32_t main_tick = 0;
 /* USER CODE END 0 */
 
 /**
@@ -116,35 +117,10 @@ int main(void)
   while (1)
   {
 		
-		
-
-		
-//		static uint16_t positionEstInx = 1;
-//		if(BLDC_DRIVER.speedCalcDone ==1)
-//		{
-//			if(TIM2->CNT >= (positionEstInx*BLDC_DRIVER.speedElapsedTick/6.0))
-//			{
-//				positionEstInx++;
-//				if(positionEstInx == 5)
-//				{
-//					BLDC_DRIVER.speedCalcDone = 0;
-//					positionEstInx = 1;
-//				}
-//				if(BLDC_DRIVER.ElAngle != 0)
-//				BLDC_DRIVER.ElAngle -=10;
-//				else
-//				BLDC_DRIVER.ElAngle =360-10;
-//				
-//				
-//			}
-//		}
-
-
-		
-//		BLDC_DRIVER.SVPWM_2();
 		BLDC_DRIVER.Irotor.pid_q.kp = q_kp;
 		BLDC_DRIVER.Irotor.pid_d.kp = d_kp;
-//		BLDC_DRIVER.Irotor.pid_q.ref = q_ref;
+		BLDC_DRIVER.Irotor.pid_q.ref = q_ref;
+		main_tick++;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

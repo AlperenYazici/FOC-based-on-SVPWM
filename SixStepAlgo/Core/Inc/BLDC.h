@@ -3,12 +3,12 @@
 #include "math.h"
 #include "string.h"
 
-#define PI 3.14159
-#define RAD2DEG		(PI/180.0) 
-#define Mod_Index 0.5774
+#define PI 3.14159f
+#define RAD2DEG		(PI/180.0f) 
+#define Mod_Index 0.5774f
 #define MagRatioModIndex (float)Mag/Mod_Index
-#define Vref 1200.0
-#define Mod_Index_2 1.0/1.732
+#define Vref 1200.0f
+#define Mod_Index_2 1.0f/1.732
 
 
 typedef struct PID
@@ -38,7 +38,7 @@ typedef struct qd
 {
 	float q = 0;
 	float d = 0;
-	PID pid_q = { 0.07,0.01,0.0 , 600.0 , &q };
+	PID pid_q = { 0.07,0.01,0.0 , 500.0 , &q };
 	PID pid_d ={ 0.07,0.01,0.0 , 0.0 , &d };
 }qd;
 
@@ -51,8 +51,8 @@ typedef struct ab
 
 typedef struct spaceVector
 {
-	double Amplitude = 1.0;
-	double Teta = 0;
+	float Amplitude = 1.0;
+	float Teta = 0;
 }spaceVector;
 
 typedef struct Bldc_Error
@@ -78,7 +78,7 @@ class SinusVectorControl
 		I_out.beta =	(I_in.a + 2*I_in.b)/sqrt(3.0);
 		return I_out;
 	}
-	qd ParkTransformation(AlfaBeta I_in , double ElAngle)
+	qd ParkTransformation(AlfaBeta I_in , float ElAngle)
 	{
 		qd I_out;
 //		ElAngle = fmod(ElAngle,60);
@@ -87,7 +87,7 @@ class SinusVectorControl
 		I_out.q	=	-sin(ElAngle)*I_in.alfa+cos(ElAngle)*I_in.beta;
 		return I_out;
 	}
-	AlfaBeta InverseParkTransformation(qd V_in, double ElAngle)
+	AlfaBeta InverseParkTransformation(qd V_in, float ElAngle)
 	{
 //		ElAngle = fmod(ElAngle,60);
 		ElAngle = ElAngle * PI / 180 ;
@@ -100,7 +100,7 @@ class SinusVectorControl
 	{
 		spaceVector V_out;
 		V_out.Amplitude	=	sqrt(V_in.alfa*V_in.alfa+V_in.beta*V_in.beta);
-		V_out.Amplitude = V_out.Amplitude>1.1?1.1:V_out.Amplitude;
+		V_out.Amplitude = V_out.Amplitude>1.1f?1.1f:V_out.Amplitude;
 		V_out.Teta	= atan( (V_in.beta/V_in.alfa) )*180/PI	;
 	
 		return V_out;
@@ -166,14 +166,14 @@ class BLDC
 	SinusVectorControl FOC;
 	void SVPWM();
 	void SVPWM_2();
-	void setUs(double value);
-	void setSpaceVecTeta(double value);
-	double getUs( );
-	double getSpaceVecTeta();
+	void setUs(float value);
+	void setSpaceVecTeta(float value);
+	float getUs( );
+	float getSpaceVecTeta();
 	void FOC_Task();
-	double PID_step(PID pid);
+	float PID_step(PID pid);
 	uint32_t svpwm2_Va;
 	uint32_t svpwm2_Vb;
 	uint32_t svpwm2_Vc;
-//	void setElAngle(double value);
+//	void setElAngle(float value);
 };

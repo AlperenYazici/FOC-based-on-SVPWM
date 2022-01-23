@@ -1,25 +1,25 @@
 #include "BLDC.h"
 
 
-#define SQRT3   1.732
-#define SQRT2   1.414
-#define InvSqrt3  1.0/SQRT3
-#define twiceInvSqrt3  2.0*InvSqrt3
-#define Vd  12.0
+#define SQRT3   1.732f
+#define SQRT2   1.414f
+#define InvSqrt3  1.0f/SQRT3
+#define twiceInvSqrt3  2.0f*InvSqrt3
+#define Vd  12.0f
 #define InvSqrt3rateVd		(float)InvSqrt3/Vd
 #define twiceInvSqrt3rateVd		(float)twiceInvSqrt3/Vd
 BLDC* ptrBLDC = NULL;
 
-#define Ts 1.0/20000
+#define Ts 1.0f/20000
 
 extern uint8_t hall_state;
 extern TIM_HandleTypeDef htim2;
 extern DMA_HandleTypeDef hdma_adc1;
 extern ADC_HandleTypeDef hadc1;
-double _duty=0.1;
+float _duty=0.1;
 extern TIM_HandleTypeDef htim1;
 //float hall_state_degree[6] = {240 , 300 , 0,60 , 120 , 180  };
-double hall_state_degree[6] = {0,300,240,180,120 , 60 };
+float hall_state_degree[6] = {0,300,240,180,120 , 60 };
 
 BLDC::BLDC()
 {
@@ -31,65 +31,65 @@ BLDC::BLDC()
 void BLDC::SVPWM()
 {
 		float Ang_R = 0;
-		double Pa=0 , Pb=0 ,Pc=0;
+		float Pa=0 , Pb=0 ,Pc=0;
 		Ang_R = fmod(ElAngle, 60) * RAD2DEG;
 //		float Ta = (((float)Mag * cos(Ang_R)) / Mod_Index) - ((((float)Mag * sin(Ang_R)) / Mod_Index) * (1.0 / sqrt(3.0)));
 //     float   Tb = (((float)Mag * sin(Ang_R)) / Mod_Index) * (2.0 / sqrt(3.0));
 //      float  Tz = 1 - (Ta + Tb);
-//		double	Ta = ((getUs() * sin((PI/3)-Ang_R))/Mod_Index);
-//		double Tb = ((getUs() * sin(Ang_R))/Mod_Index);
-//		double Tz = 1.0 - (Ta + Tb);
+//		float	Ta = ((getUs() * sin((PI/3)-Ang_R))/Mod_Index);
+//		float Tb = ((getUs() * sin(Ang_R))/Mod_Index);
+//		float Tz = 1.0 - (Ta + Tb);
 	
 		if (ElAngle>=0 && ElAngle<60)
 		{
-				double	Ta = (Vstator.alfa)/Vd - InvSqrt3rateVd*Vstator.beta;
-				double Tb = twiceInvSqrt3rateVd*Vstator.beta;
-				double Tz = 1.0 - (Ta + Tb);
+				float	Ta = (Vstator.alfa)/Vd - InvSqrt3rateVd*Vstator.beta;
+				float Tb = twiceInvSqrt3rateVd*Vstator.beta;
+				float Tz = 1.0f - (Ta + Tb);
 				Pa = Tz/2 + Ta + Tb;
 				Pb = Tz/2 + Tb;
 				Pc = Tz/2;
 		}
 		else if ( ElAngle >= 60 && ElAngle < 120 )
 		{
-				double	Ta = (Vstator.alfa)/Vd + InvSqrt3rateVd*Vstator.beta;
-				double Tb = InvSqrt3rateVd*Vstator.beta -(Vstator.alfa)/Vd;
-				double Tz = 1.0 - (Ta + Tb);
+				float	Ta = (Vstator.alfa)/Vd + InvSqrt3rateVd*Vstator.beta;
+				float Tb = InvSqrt3rateVd*Vstator.beta -(Vstator.alfa)/Vd;
+				float Tz = 1.0f - (Ta + Tb);
 				Pa = Tz/2 + Ta;
 				Pb = Tz/2 + Ta + Tb;
 				Pc = Tz/2;
 		}
 		else if (ElAngle >= 120 && ElAngle < 180 )
 		{
-				double	Ta = twiceInvSqrt3rateVd*(Vstator.beta);
-				double Tb = -InvSqrt3rateVd*Vstator.beta -(Vstator.alfa)/Vd;
-				double Tz = 1.0 - (Ta + Tb);
+				float	Ta = twiceInvSqrt3rateVd*(Vstator.beta);
+				float Tb = -InvSqrt3rateVd*Vstator.beta -(Vstator.alfa)/Vd;
+				float Tz = 1.0f - (Ta + Tb);
 				Pa = Tz/2;
 				Pb = Tz/2 + Ta + Tb;
 				Pc = Tz/2 + Tb;
 		}
 		else if (ElAngle >= 180 && ElAngle < 240) 
 		{
-				double	Ta = - ((Vstator.alfa)/Vd - InvSqrt3rateVd*Vstator.beta);
-				double Tb = -twiceInvSqrt3rateVd*Vstator.beta;
-				double Tz = 1.0 - (Ta + Tb);
+				float	Ta = - ((Vstator.alfa)/Vd - InvSqrt3rateVd*Vstator.beta);
+				float Tb = -twiceInvSqrt3rateVd*Vstator.beta;
+				float Tz = 1.0f - (Ta + Tb);
 				Pa = Tz/2;
 				Pb = Tz/2 + Ta;
 				Pc = Tz/2 + Ta + Tb;
 		}
 		else if( ElAngle >= 240 && ElAngle < 300) 
 		{
-				double	Ta = - ((Vstator.alfa)/Vd + InvSqrt3rateVd*Vstator.beta);
-				double Tb = -( InvSqrt3rateVd*Vstator.beta -(Vstator.alfa)/Vd);
-				double Tz = 1.0 - (Ta + Tb);
+				float	Ta = - ((Vstator.alfa)/Vd + InvSqrt3rateVd*Vstator.beta);
+				float Tb = -( InvSqrt3rateVd*Vstator.beta -(Vstator.alfa)/Vd);
+				float Tz = 1.0f - (Ta + Tb);
 				Pa = Tz/2 + Tb;
 				Pb = Tz/2;
 				Pc = Tz/2 + Ta + Tb;
 		}
 		else if( ElAngle >= 300 && ElAngle < 360) 
 		{
-				double	Ta = -twiceInvSqrt3rateVd*(Vstator.beta);
-				double Tb = -(-InvSqrt3rateVd*Vstator.beta -(Vstator.alfa)/Vd);
-				double Tz = 1.0 - (Ta + Tb);
+				float	Ta = -twiceInvSqrt3rateVd*(Vstator.beta);
+				float Tb = -(-InvSqrt3rateVd*Vstator.beta -(Vstator.alfa)/Vd);
+				float Tz = 1.0f - (Ta + Tb);
 				Pa = Tz/2 + Ta + Tb;
 				Pb = Tz/2;
 				Pc = Tz/2 + Ta;
@@ -98,11 +98,11 @@ void BLDC::SVPWM()
 		{
 			Error.svpwm.bits.wrongElAngle = 1;
 		}
-		pwmDuties.pwm_highside_1 = Vref+(Vref*(Pa-0.5)*_duty);
+		pwmDuties.pwm_highside_1 = Vref+(Vref*(Pa-0.5f)*_duty);
 		pwmDuties.pwm_highside_1 = pwmDuties.pwm_highside_1>TIM1->ARR?TIM1->ARR:(pwmDuties.pwm_highside_1);
-		pwmDuties.pwm_highside_2 = Vref+(Vref*(Pb-0.5)*_duty);
+		pwmDuties.pwm_highside_2 = Vref+(Vref*(Pb-0.5f)*_duty);
 		pwmDuties.pwm_highside_2 = pwmDuties.pwm_highside_2>TIM1->ARR?TIM1->ARR:pwmDuties.pwm_highside_2;
-		pwmDuties.pwm_highside_3 = Vref+(Vref*(Pc-0.5)*_duty);
+		pwmDuties.pwm_highside_3 = Vref+(Vref*(Pc-0.5f)*_duty);
 		pwmDuties.pwm_highside_3 = pwmDuties.pwm_highside_3>TIM1->ARR?TIM1->ARR:pwmDuties.pwm_highside_3;
 		TIM1->CCR1 = pwmDuties.pwm_highside_1;
 		TIM1->CCR2 =  pwmDuties.pwm_highside_2;
@@ -230,13 +230,13 @@ void BLDC::SVPWM_2()
 		}
 	}
 	
-	Va = Vref+(Vref*(Va-0.5)*_duty);
+	Va = Vref+(Vref*(Va-0.5f)*_duty);
 	Va = Va>(TIM1->ARR-1) ? (TIM1->ARR-1) : Va;
 	
-	Vb = Vref+(Vref*(Vb-0.5)*_duty);
+	Vb = Vref+(Vref*(Vb-0.5f)*_duty);
 	Vb = Vb>(TIM1->ARR-1) ? (TIM1->ARR-1) : Vb;
 	
-	Vc = Vref+(Vref*(Vc-0.5)*_duty);
+	Vc = Vref+(Vref*(Vc-0.5f)*_duty);
 	Vc = Vc>(TIM1->ARR-1) ? (TIM1->ARR-1) : Vc;
 	svpwm2_Va =Va;
 	svpwm2_Vb =Vb;
@@ -255,15 +255,15 @@ void BLDC::FOC_Task()
 	Vstator = FOC.InverseParkTransformation(Vrotor,ElAngle);
 	//spaceVec	=	FOC.calcRefSpaceVector(Vstator);
 }
-void BLDC::setUs(double value)
+void BLDC::setUs(float value)
 {
-	if(value>1.1)
+	if(value>1.1f)
 	{
-		spaceVec.Amplitude = 1.1;
+		spaceVec.Amplitude = 1.1f;
 	}
-	else if(value<0.0)
+	else if(value<0.0f)
 	{
-		spaceVec.Amplitude = 0.0;
+		spaceVec.Amplitude = 0.0f;
 	}
 	else
 	{
@@ -271,7 +271,7 @@ void BLDC::setUs(double value)
 	}
 }
 
-void BLDC::setSpaceVecTeta(double value)
+void BLDC::setSpaceVecTeta(float value)
 {
 	if(value>360)
 	{
@@ -286,7 +286,7 @@ void BLDC::setSpaceVecTeta(double value)
 		spaceVec.Amplitude = value;
 	}
 }
-//void BLDC::setElAngle(double value)
+//void BLDC::setElAngle(float value)
 //{
 //	if(value>360)
 //	{
@@ -298,22 +298,22 @@ void BLDC::setSpaceVecTeta(double value)
 //	}
 //	else
 //	{
-//		ElAngle = (double)value;
+//		ElAngle = (float)value;
 //	}
 //	return;
 //}
-double BLDC:: getUs( )
+float BLDC:: getUs( )
 {
 	return spaceVec.Amplitude;
 }
 
-double BLDC::getSpaceVecTeta( )
+float BLDC::getSpaceVecTeta( )
 {
 	return spaceVec.Teta;
 }
 
 
-double BLDC::PID_step(PID pid)
+float BLDC::PID_step(PID pid)
 {
 	float error = pid.ref - *pid.sensValue;
 	// ... Devam edecek ....
@@ -430,7 +430,7 @@ void ADC1_IRQHandler(void)
 	{
 		if(offsetAdcTuneIndx>5)
 		{
-			static float avrgOffset = 0;
+//			static float avrgOffset = 0;
 			ptrBLDC->Ia_offset += ptrBLDC->focMeasures[0].Ia;
 		
 			ptrBLDC->Ib_offset += ptrBLDC->focMeasures[0].Ib;
@@ -462,7 +462,7 @@ void ADC1_IRQHandler(void)
 			case 6: ptrBLDC->ElAngle=hall_state_degree[2];   break;
 			case 7: ptrBLDC->ElAngle=0.0; 		 break;
 		}
-		ptrBLDC->Iphase.a = (float)(ptrBLDC->Ia_offset - ptrBLDC->focMeasures[0].Ia)*1.0;
+		ptrBLDC->Iphase.a = (float)(ptrBLDC->Ia_offset - ptrBLDC->focMeasures[0].Ia)*1.0f;
 		ptrBLDC->Iphase.b = (ptrBLDC->Ib_offset - ptrBLDC->focMeasures[0].Ib);
 //		ptrBLDC->Iphase.c = ptrBLDC->Ic_offset - ptrBLDC->focMeasures[0].Ic;
 		ptrBLDC->Iphase.c = - ptrBLDC->Iphase.a - ptrBLDC->Iphase.b;
